@@ -2,6 +2,13 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZFCM7Y2WCW"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-ZFCM7Y2WCW');
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f7f7f5">
   <meta name="description" content="萬用回應SOP產生器。輸入事件，一鍵產生回應圖片。">
@@ -112,6 +119,7 @@
       <input id="event" type="text" maxlength="120" value="" placeholder="例如：今天又淹水了" autocomplete="off" required>
       <div class="samples" aria-label="試試這些事件">
         <span>試試看</span>
+        <button type="button" class="sample" data-event="今天股市大跌">股市大跌</button>
         <button type="button" class="sample" data-event="今天又淹水了">淹水</button>
         <button type="button" class="sample" data-event="演唱會散場交通大塞車">演唱會塞車</button>
         <button type="button" class="sample" data-event="路燈壞三天還沒修">路燈不亮</button>
@@ -321,6 +329,18 @@
           include2: ['環境清潔與巡查', '使用者的需求'],
           include3: ['後續設備更新', '管理維護的效率'],
           explainer: ['公園及相關管理單位', '第一線維護同仁']
+        },
+        {
+          match: /股市|股票|台股|美股|大跌|崩盤|跌停|套牢|存股|融資/,
+          issue: '股市波動與持股應變',
+          followup: '持股調整與資金安排',
+          first: ['馬上看盤', '確認帳面損益', '掌握各類股的跌幅'],
+          immediate: ['盤點手上持股', '檢視停損與加碼機制', '啟動資金水位的應變'],
+          include1: ['帳面損益的變化', '各類股的跌幅', '持股的比重'],
+          include2: ['融資維持率的狀況', '資金水位的調度', '國際股市的連動'],
+          include3: ['長期投資的信心', '下個月的生活預算', '逢低布局的可能性'],
+          explainer: ['財經專家', '相關分析師'],
+          defended: ['辛苦的第一線投資人', '認真存股的同仁', '每天看盤的同仁']
         }
       ];
       let activeContext = null;
@@ -352,8 +372,12 @@
       function wrap(ctx, text, width) {
         const lines = []; let line = '';
         for (const char of Array.from(text)) {
-          if (line && ctx.measureText(line + char).width > width) { lines.push(line); line = char; }
-          else line += char;
+          if (line && ctx.measureText(line + char).width > width) {
+            // Closing punctuation must not start a line, so carry the previous character down with it.
+            const carry = '，。、；：！？）」』》〉'.includes(char) && line.length > 1 ? Array.from(line).pop() : '';
+            lines.push(carry ? line.slice(0, -carry.length) : line);
+            line = carry + char;
+          } else line += char;
         }
         lines.push(line);
         return lines;
@@ -378,7 +402,7 @@
         } while (true);
         // Height follows the content: last text baseline plus a bottom margin matching the top one.
         const lastBaseline = 240 + eventLines.length * 48 + 52 + groups.reduce((h, lines) => h + lines.length * bodyLine + 30, 0) - bodyLine - 30;
-        const H = Math.ceil((lastBaseline + 100) / 10) * 10;
+        const H = Math.ceil((lastBaseline + 180) / 10) * 10;
         c.width = W; c.height = H;
         ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
         ctx.textBaseline = 'alphabetic';
@@ -393,6 +417,9 @@
           for (const line of lines) { ctx.fillText(line, M, y); y += bodyLine; }
           y += 30;
         }
+        // Shared images travel without the page, so the image itself carries the way back.
+        ctx.fillStyle = '#72726d'; ctx.font = `500 28px ${font}`;
+        ctx.fillText('mtwmt.com/sop', M, H - 80);
         return c.toDataURL('image/png');
       }
       // Fields filled by a sample button stay random on every generate; anything the user typed is kept.
