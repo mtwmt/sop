@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="408" height="128" viewBox="0 0 408 128" role="img" aria-labelledby="title">
+<title id="title">請我喝杯咖啡・隨喜贊助</title>
+<rect width="408" height="128" fill="#e9e9e5"/>
+<g fill="#252524">
+<path d="M33 46h51v23c0 17-11 29-26 29S33 86 33 69V46z"/>
+<path d="M79 51h8c14 0 20 7 20 18s-7 18-22 18h-8v-10h7c8 0 12-3 12-8s-4-8-12-8h-5V51z"/>
+<rect x="28" y="103" width="70" height="5"/>
+<path d="M45 24h5v16h-5zM59 18h5v22h-5zM73 25h5v15h-5z"/>
+</g>
+<text x="134" y="60" fill="#252524" font-family="PingFang TC,Noto Sans TC,Microsoft JhengHei,sans-serif" font-size="25" font-weight="700">請我喝杯咖啡</text>
+<text x="134" y="91" fill="#666660" font-family="PingFang TC,Noto Sans TC,Microsoft JhengHei,sans-serif" font-size="17">隨喜贊助</text>
+</svg>

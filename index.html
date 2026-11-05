@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f7f5">
+  <meta name="description" content="萬用回應SOP產生器。輸入事件，一鍵產生回應圖片。">
+  <title>萬用回應SOP產生器</title>
+  <style>
+    :root { color-scheme: light; --bg:#f7f7f5; --text:#20201e; --sub:#72726d; --field:#ebebe8; --field-hover:#e4e4e0; --dark:#252524; font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    *, *::before, *::after { box-sizing: border-box; border-radius: 0 !important; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; min-width: 320px; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+    input, button { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--dark); outline-offset: 3px; }
+    .container { max-width: 740px; padding: 0 24px; margin: 0 auto; }
+    header.container { padding-top: 48px; }
+    .brand { font-size: 14px; font-weight: 760; letter-spacing: -.03em; }
+    main.container { padding-top: 96px; padding-bottom: 96px; }
+    h1 { font-size: clamp(36px, 6.5vw, 51px); line-height: 1.2; letter-spacing: -.065em; margin: 0; font-weight: 780; }
+    .intro { color: #656560; margin: 16px 0 48px; font-size: 15px; line-height: 1.9; }
+    .label { display: block; margin-bottom: 16px; font-size: 14px; font-weight: 700; }
+    input[type=text] { display: block; width: 100%; border: 0; outline: none; background: var(--field); color: var(--text); padding: 16px 20px; height: 64px; font-size: 15px; }
+    input[type=text]:focus { background: var(--field-hover); outline: 2px solid #41413e; outline-offset: -2px; }
+    input::placeholder { color: #959590; opacity: 1; }
+    .samples { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 16px 0 0; }
+    .samples span { font-size: 12px; color: #898983; margin-right: 3px; }
+    .sample { border: 0; background: #e9e9e5; padding: 8px 12px; color: #5e5e58; font-size: 12px; font-weight: 550; }
+    .sample:hover { background: #dededa; }
+    .team-field { margin-top: 32px; }
+    .unknown-fields { margin-top: 32px; }
+    .unknown-fields[hidden] { display: none; }
+    .unknown-title { margin: 0 0 8px; font-size: 15px; font-weight: 700; }
+    .unknown-note { margin: 0 0 24px; color: var(--sub); font-size: 13px; line-height: 1.8; }
+    .unknown-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; }
+    .unknown-field label { display: block; margin-bottom: 8px; font-size: 13px; color: #61615c; }
+    .unknown-field input[type=text] { height: 48px; padding: 12px 16px; font-size: 14px; }
+    .options { margin: 32px 0 0; }
+    details summary { cursor: pointer; font-size: 13px; color: #696963; width: fit-content; list-style: none; user-select: none; }
+    details summary::-webkit-details-marker { display: none; }
+    details summary:hover { color: var(--text); }
+    .options-grid { padding: 24px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 24px 16px; }
+    .option label { display: block; margin-bottom: 8px; font-size: 12px; color: #61615c; }
+    .option input { height: 48px; padding: 12px; font-size: 12px; }
+    .hint { font-size: 12px; color: var(--sub); line-height: 1.8; margin: 16px 0 0; }
+    .primary { display: block; width: 100%; height: 56px; border: 0; padding: 0 16px; background: var(--dark); color: #fff; font-size: 15px; font-weight: 660; margin-top: 32px; }
+    .primary:hover { background: #444440; }
+    .primary:active { background: #101010; }
+    .primary:disabled { opacity: .6; cursor: wait; }
+    #output { margin-top: 64px; scroll-margin-top: 24px; }
+    #output[hidden] { display: none; }
+    .output-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin: 0 0 16px; }
+    .output-heading h2 { font-size: 21px; margin: 0; letter-spacing: -.045em; font-weight: 760; }
+    .output-heading span { font-size: 12px; color: var(--sub); }
+    .preview-image { display: block; width: 100%; height: auto; background: #fff; user-select: auto; -webkit-user-select: auto; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .action { border: 0; height: 56px; background: #e8e8e4; color: #252523; font-size: 14px; font-weight: 650; }
+    .action:hover { background: #dfdfda; }
+    .action.download { background: #252524; color: #fff; }
+    .action.download:hover { background: #444440; }
+    .regenerate { display: block; border: 0; color: #666660; background: none; font-size: 13px; padding: 16px 4px; margin: 8px auto 0; }
+    .regenerate:hover { color: #161614; }
+    .status { color: #555550; min-height: 19px; font-size: 12px; line-height: 1.65; text-align: center; margin-top: 8px; }
+    .support { margin-top: 96px; text-align: center; }
+    .support-link { display: inline-block; width: min(216px, 100%); vertical-align: top; }
+    .support-link img { display: block; width: 100%; height: auto; }
+    .support-link:hover { opacity: .85; }
+    .support-link:focus-visible { outline: 2px solid var(--dark); outline-offset: 4px; }
+    @media (max-width: 600px) {
+      .container { padding: 0 24px; }
+      header.container { padding-top: 40px; }
+      main.container { padding-top: 80px; padding-bottom: 72px; }
+      h1 { font-size: clamp(34px, 9vw, 46px); }
+      .intro { font-size: 14px; margin-top: 16px; margin-bottom: 40px; }
+      .options-grid, .unknown-grid { grid-template-columns: 1fr; gap: 16px; }
+      #output { margin-top: 56px; }
+      .support { margin-top: 64px; }
+      .output-heading h2 { font-size: 20px; }
+    }
+    .preview-empty { display: none; }
+    /* Desktop: form on the left, sticky result preview on the right. Mobile keeps the single column. */
+    @media (min-width: 1000px) {
+      .container { max-width: 1152px; padding: 0 48px; }
+      header.container { padding-top: 48px; }
+      main.container { padding-top: 72px; padding-bottom: 80px; }
+      .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px); column-gap: 72px; align-items: start; }
+      .col-main { grid-column: 1; grid-row: 1; }
+      h1 { font-size: clamp(32px, 3.4vw, 51px); }
+      #output, .preview-empty { grid-column: 2; grid-row: 1; margin-top: 0; }
+      .preview-empty { display: flex; align-items: center; justify-content: center; min-height: 420px; max-height: calc(100vh - 120px); aspect-ratio: 4 / 5; background: #ecece8; color: var(--sub); font-size: 13px; text-align: center; padding: 24px; line-height: 1.8; }
+      #output:not([hidden]) + .preview-empty { display: none; }
+      .support { margin-top: 80px; }
+    }
+    /* Only pin the preview when the whole result fits on screen, so the buttons stay reachable. */
+    @media (min-width: 1000px) and (min-height: 820px) {
+      #output, .preview-empty { position: sticky; top: 24px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <header class="container"><div class="brand">萬用回應SOP</div></header>
+  <main class="container">
+    <div class="layout">
+    <div class="col-main">
+    <h1>萬用回應SOP產生器</h1>
+    <p class="intro">遇到問題不知道怎麼回？輸入事件，產生一張萬用回應梗圖。</p>
+
+    <form id="generator-form">
+      <label class="label" for="event">發生什麼事？</label>
+      <input id="event" type="text" maxlength="120" value="" placeholder="例如：今天又淹水了" autocomplete="off" required>
+      <div class="samples" aria-label="試試這些事件">
+        <span>試試看</span>
+        <button type="button" class="sample" data-event="今天又淹水了">淹水</button>
+        <button type="button" class="sample" data-event="演唱會散場交通大塞車">演唱會塞車</button>
+        <button type="button" class="sample" data-event="路燈壞三天還沒修">路燈不亮</button>
+      </div>
+
+      <div class="team-field">
+        <label class="label" for="team">你們的單位或團隊（選填）</label>
+        <input id="team" type="text" maxlength="40" placeholder="例如：公司、學校、社區管委會" autocomplete="off">
+      </div>
+
+      <section class="unknown-fields" id="unknown-fields" hidden aria-labelledby="unknown-title">
+        <h2 class="unknown-title" id="unknown-title">補充事件細節（選填）</h2>
+        <p class="unknown-note">這個事件沒有預設回應。補充以下資訊，產生的內容會更符合實際情況；不填也可以直接產生。</p>
+        <div class="unknown-grid">
+          <div class="unknown-field"><label for="affected">影響到誰？</label><input id="affected" type="text" maxlength="80" placeholder="例如：高樓層住戶" autocomplete="off"></div>
+          <div class="unknown-field"><label for="impact">目前的具體狀況</label><input id="impact" type="text" maxlength="100" placeholder="例如：電梯已停用三天" autocomplete="off"></div>
+          <div class="unknown-field"><label for="action">希望怎麼處理？</label><input id="action" type="text" maxlength="100" placeholder="例如：儘快安排檢修" autocomplete="off"></div>
+          <div class="unknown-field"><label for="followup">後續需要追蹤什麼？</label><input id="followup" type="text" maxlength="100" placeholder="例如：電梯修復時程" autocomplete="off"></div>
+        </div>
+      </section>
+
+      <details class="options">
+        <summary>自訂回應內容（選填）</summary>
+        <div class="options-grid">
+          <div class="option"><label for="critic">誰不懂狀況？</label><input id="critic" type="text" maxlength="80" value="有些人" placeholder="有些人"></div>
+          <div class="option"><label for="first">第一時間……</label><input id="first" type="text" maxlength="160" placeholder="自動產生"></div>
+          <div class="option"><label for="immediate">即刻……</label><input id="immediate" type="text" maxlength="160" placeholder="自動產生"></div>
+          <div class="option"><label for="include1">包括（1）</label><input id="include1" type="text" maxlength="140" placeholder="自動產生"></div>
+          <div class="option"><label for="include2">包括（2）</label><input id="include2" type="text" maxlength="140" placeholder="自動產生"></div>
+          <div class="option"><label for="include3">包括（3）</label><input id="include3" type="text" maxlength="140" placeholder="自動產生"></div>
+          <div class="option"><label for="explainer">誰已經清楚說明？</label><input id="explainer" type="text" maxlength="120" placeholder="自動產生"></div>
+          <div class="option"><label for="accuser">誰不要再攻擊？</label><input id="accuser" type="text" maxlength="100" placeholder="自動產生"></div>
+          <div class="option"><label for="defended">不要再攻擊誰？</label><input id="defended" type="text" maxlength="100" placeholder="自動產生"></div>
+        </div>
+        <p class="hint">留空的欄位會隨機產生說法。</p>
+      </details>
+
+      <button class="primary" id="generate" type="submit">產生萬用回應SOP</button>
+    </form>
+    </div>
+
+    <section id="output" hidden aria-labelledby="output-title">
+      <div class="output-heading"><h2 id="output-title">產生結果</h2><span>圖片預覽</span></div>
+      <img class="preview-image" id="preview-image" alt="萬用回應SOP 圖片預覽" width="1080" height="1350">
+      <div class="actions">
+        <button type="button" class="action" id="copy">複製文字</button>
+        <button type="button" class="action download" id="download">下載圖片</button>
+      </div>
+      <button type="button" class="regenerate" id="regenerate">再產生一次</button>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+    </section>
+    <div class="preview-empty" aria-hidden="true">產生後，圖片預覽會顯示在這裡。</div>
+    </div>
+
+    <aside class="support" aria-label="隨喜贊助">
+      <a class="support-link" href="https://payment.ecpay.com.tw/QuickCollect/PayData?%2bDPYp4kdkvngewwp7LwqtN30JIC2JQtzCRNKivpV29g%3d" target="_blank" rel="noopener noreferrer" aria-label="前往綠界隨喜贊助，可自行填寫贊助金額">
+        <img src="./donate.svg" alt="請我喝杯咖啡，隨喜贊助" width="408" height="128" loading="lazy">
+      </a>
+    </aside>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+      const $ = id => document.getElementById(id);
+      const data = {
+        first: ['要求相關單位全面了解', '請同仁即時掌握現場狀況', '請權責單位進行盤點', '責成相關單位了解', '要求{team}積極處理', '請各單位同步蒐集資訊'],
+        immediate: ['啟動跨單位協調機制', '進行必要的應變處置', '召開專案會議', '盤點後續改善方向', '釐清相關作業流程', '研擬具體精進作為'],
+        include1: ['各方的反映', '現場的實際情形', '相關資訊的掌握', '目前作業的進度'],
+        include2: ['各單位橫向聯繫', '後續處置的流程', '相關權責的釐清', '跨單位的協調'],
+        include3: ['後續精進的可能性', '第一線同仁的辛勞', '必要的滾動式檢討', '整體工作的推動'],
+        explainer: ['相關單位', '{team}', '權責單位', '我們的同仁'],
+        accuser: ['外界', '有些人', '部分人士', '大家'],
+        defended: ['辛苦的第一線同仁', '第一線的工作夥伴', '{team}', '認真做事的同仁']
+      };
+      // Depend on the event instead of generating the same unrelated script for every input.
+      // No API call: lightweight, explainable keyword-based topic matching.
+      const scenarios = [
+        {
+          match: /淹水|積水|排水|豪雨|暴雨|水災|下大雨|雨水/,
+          issue: '積淹水與排水應變',
+          followup: '排水改善及積水路段的處理',
+          first: ['請相關單位確認積水熱點', '要求掌握各區的降雨與積水狀況', '責成同仁檢視排水設施的運作情形'],
+          immediate: ['調度抽水與排水應變資源', '檢查側溝與下水道通暢情形', '啟動易積水路段巡查'],
+          include1: ['排水系統的負荷', '各路段的積水深度', '抽水設備的調度'],
+          include2: ['道路通行安全', '易淹水地區的通報', '側溝清淤的進度'],
+          include3: ['後續積水改善', '相關通報的處理', '短時間強降雨的應變'],
+          explainer: ['相關單位', '{team}']
+        },
+        {
+          match: /停電|斷電|電力|停水|斷水|自來水|水管|漏水|供電/,
+          issue: '民生管線與供應問題',
+          followup: '復電復水與管線修復的進度',
+          first: ['聯繫供應單位確認受影響範圍', '請相關單位釐清中斷原因', '要求掌握搶修與恢復供應的進度'],
+          immediate: ['啟動跨單位搶修聯繫', '盤點受影響者的需求', '確認緊急供應與應變方式'],
+          include1: ['停供的範圍與原因', '搶修人力的安排'],
+          include2: ['民生必要供應', '即時的通報'],
+          include3: ['預估修復時程', '管線老化的改善'],
+          explainer: ['供應單位', '相關搶修團隊']
+        },
+        {
+          match: /塞車|壅塞|交通|停車|公車|捷運|車流|擁堵|道路|車禍|違停|行人|人行道/,
+          issue: '交通與道路通行',
+          followup: '交通疏導與道路改善',
+          first: ['要求交通單位檢視現場車流', '請相關單位了解道路壅塞原因', '責成同仁掌握尖峰時段的通行狀況'],
+          immediate: ['研議號誌調整與車流引導', '協調交通疏導和動線安排', '檢討現場交通管制措施'],
+          include1: ['車流量與壅塞路段', '公車與捷運接駁動線', '周邊道路的通行效率'],
+          include2: ['行人及用路人安全', '交通號誌的秒數配置', '大眾運輸的銜接'],
+          include3: ['周邊交通改善', '尖峰時段的疏導', '警力及交管人力的安排'],
+          explainer: ['交通管理單位', '負責交管的同仁']
+        },
+        {
+          match: /路燈|燈不亮|照明|紅綠燈|號誌/,
+          issue: '公共照明與交通設施維修',
+          followup: '故障設施的檢修和通報',
+          first: ['要求維管單位確認故障點位', '請同仁查明照明設備異常原因', '掌握通報的設施位置'],
+          immediate: ['派員檢測並安排維修', '檢視周邊是否還有類似故障', '協調設備維護人員到場'],
+          include1: ['設備故障的原因', '影響範圍與安全風險'],
+          include2: ['修復的排程', '夜間行走與用路安全'],
+          include3: ['其他路段的巡檢', '後續維護機制'],
+          explainer: ['設施維管單位', '相關工程同仁']
+        },
+        {
+          match: /垃圾|廚餘|回收|髒亂|清潔|臭味|惡臭|環保|鼠患/,
+          issue: '環境清潔與垃圾處理',
+          followup: '清運、巡查及環境改善',
+          first: ['請環保單位查明現場狀況', '要求確認清運與清潔作業', '了解各方反映的環境問題'],
+          immediate: ['安排清潔與巡查人員處理', '協調垃圾清運及巡查', '盤點現場污染與衛生風險'],
+          include1: ['垃圾清運班次', '髒亂熱點的清潔'],
+          include2: ['環境衛生檢查', '周邊的生活品質'],
+          include3: ['後續巡查頻率', '違規棄置的防範'],
+          explainer: ['環境維護單位', '負責環境維護的同仁']
+        },
+        {
+          match: /學校|學生|老師|校園|午餐|托育|幼兒|教育|上課|補習/,
+          issue: '校園與教育照顧',
+          followup: '校園需求與相關措施的檢討',
+          first: ['請教育單位了解學生和家長的反映', '要求掌握學校端的實際情形', '責成同仁與校方釐清事件經過'],
+          immediate: ['啟動學校與家長溝通', '確認學生權益及校園安全', '盤點現行教育措施'],
+          include1: ['學生的學習權益', '家長和校方的意見'],
+          include2: ['校園管理的流程', '第一線教師的需求'],
+          include3: ['後續改善方案', '教育資源的配置'],
+          explainer: ['校方及相關單位', '相關教育單位']
+        },
+        {
+          match: /食安|食品|餐廳|中毒|過期|餐飲|食物|便當|吃壞/,
+          issue: '食品安全與衛生檢查',
+          followup: '食品查驗和責任釐清',
+          first: ['請衛生單位查明食品來源', '要求掌握消費者反映與通報', '請相關單位了解疑似食安事件'],
+          immediate: ['安排食品衛生檢查', '啟動相關採檢和追蹤', '確認供餐與販售環節'],
+          include1: ['食材來源與保存條件', '食品抽驗與檢查結果'],
+          include2: ['消費者健康與安全', '業者的衛生管理'],
+          include3: ['後續檢查機制', '必要的後續處置'],
+          explainer: ['衛生管理單位', '食品安全同仁']
+        },
+        {
+          match: /噪音|太吵|吵鬧|演唱會|跨年|煙火|活動|表演|擾民/,
+          issue: '大型活動與周邊生活影響',
+          followup: '活動管理與周邊的影響',
+          first: ['要求主辦及權責單位了解各方反映', '請同仁確認活動現場管理情形', '掌握周邊交通與噪音狀況'],
+          immediate: ['協調主辦單位改善管理措施', '檢討活動時段與周邊動線', '加強現場巡查和秩序維護'],
+          include1: ['周邊的休息品質', '活動現場的安全管理'],
+          include2: ['人潮與交通疏導', '音量及時間的管制'],
+          include3: ['後續活動的精進', '相關單位的協調'],
+          explainer: ['活動主辦及權責單位', '現場管理團隊']
+        },
+        {
+          match: /房價|租金|房租|租屋|都更|住宅|居住|建案|社宅/,
+          issue: '居住與住房負擔',
+          followup: '居住方案與住宅需求',
+          first: ['請住宅單位盤點實際需求', '要求掌握租屋與居住現況', '責成同仁檢視現有居住方案'],
+          immediate: ['研議住宅資源的配置', '檢視租屋及居住協助措施', '協調相關單位盤點可行方案'],
+          include1: ['可負擔的租金', '居住安全與品質'],
+          include2: ['租屋族的實際需求', '公共住宅的供給'],
+          include3: ['方案執行的進度', '青年與家庭的居住需求'],
+          explainer: ['住宅相關單位', '相關團隊']
+        },
+        {
+          match: /火災|火警|地震|公安|治安|詐騙|事故|受傷|倒塌|災害|救護/,
+          issue: '公共安全與緊急應變',
+          followup: '現場安全與後續調查',
+          first: ['請權責單位掌握現場風險', '要求確認人員安全與通報情形', '責成相關單位了解事件經過'],
+          immediate: ['啟動必要的緊急應變', '協調現場救援與安全維護', '確認受影響者的需求'],
+          include1: ['現場人員的安全', '相關通報與處置時序'],
+          include2: ['跨單位的救援協調', '事故原因的調查'],
+          include3: ['後續防範措施', '必要的安全檢查'],
+          explainer: ['應變及權責單位', '第一線應變人員']
+        },
+        {
+          match: /物價|漲價|電價|票價|預算|支出|補助|費用|漲租|加價/,
+          issue: '民生負擔與費用調整',
+          followup: '費用影響與配套措施',
+          first: ['要求相關單位評估民生影響', '請同仁了解費用調整的原因', '盤點各方的負擔'],
+          immediate: ['研議可行的配套措施', '評估方案調整的影響', '整合相關單位的意見'],
+          include1: ['一般家庭的負擔', '費用調整的合理性'],
+          include2: ['受影響者的需求', '既有補助與支持措施'],
+          include3: ['財務與預算的可行性', '後續方案的檢討'],
+          explainer: ['財務及相關單位', '{team}']
+        },
+        {
+          match: /公園|樹木|蚊子|遊樂場|公廁|綠地|草皮|步道/,
+          issue: '公共空間與環境維護',
+          followup: '公共設施的維修與管理',
+          first: ['要求管理單位檢查公共空間', '請同仁確認設施的實際使用情形', '掌握各方反映的現場位置'],
+          immediate: ['安排現場巡查及維護', '檢查設施安全並研擬改善', '協調相關單位加強清潔'],
+          include1: ['使用者的安全', '設施的維護排程'],
+          include2: ['環境清潔與巡查', '使用者的需求'],
+          include3: ['後續設備更新', '管理維護的效率'],
+          explainer: ['公園及相關管理單位', '第一線維護同仁']
+        }
+      ];
+      let activeContext = null;
+      let chosen = {}, generated = '', imageData = '';
+      const random = list => list[Math.floor(Math.random() * list.length)];
+      const pickAll = () => { activeContext = scenarios.find(item => item.match.test(topic())) || null; chosen = Object.fromEntries(Object.entries(data).map(([key, list]) => [key, random(activeContext?.[key] || list).replaceAll('{team}', $('team').value.trim() || '相關團隊')])); };
+      const val = id => ($(id).value.trim() || chosen[id] || '');
+      const topic = () => $('event').value.trim();
+      const notify = txt => { $('status').textContent = txt; };
+      const updateUnknownFields = () => {
+        const event = topic();
+        $('unknown-fields').hidden = !event || scenarios.some(item => item.match.test(event));
+      };
+      const field = id => $(id).value.trim();
+      const tailored = (id, fallback) => field(id) || fallback || chosen[id] || '';
+      const makeText = () => {
+        const unknown = !activeContext;
+        const issue = activeContext?.issue || `「${topic()}」這件事`;
+        const first = tailored('first', unknown && field('impact') ? `請相關單位確認「${field('impact')}」的實際情形` : '');
+        const immediate = tailored('immediate', unknown && field('action') ? `研議「${field('action')}」的可行方式` : '');
+        const include1 = tailored('include1', unknown && field('affected') ? `${field('affected')}的實際需求` : '');
+        const include2 = tailored('include2', unknown && field('impact') ? `「${field('impact')}」的後續影響` : '');
+        const include3 = tailored('include3', unknown && field('followup') ? `${field('followup')}的追蹤進度` : '');
+        const followup = unknown && field('followup') ? `「${field('followup')}」` : (activeContext?.followup || `「${topic()}」後續的處理`);
+        return `關於${issue}，我想，${val('critic') || '有些人'}不懂狀況。\n\n其實，針對「${topic()}」，我們第一時間${first}，即刻${immediate}，全面的來了解，也有掌握狀況。\n包括${include1}，包括${include2}，包括${include3}。\n\n至於${followup}，其實${val('explainer')}都有清楚的說明。\n我想，我要為第一線人員說句公道話，${val('accuser')}不要再攻擊${val('defended')}。\n\n未來對於這件事，我們持續研議，有新的進度都會再說明。`;
+      };
+
+      // The image preview and downloaded PNG use the exact same pixels.
+      function wrap(ctx, text, width) {
+        const lines = []; let line = '';
+        for (const char of Array.from(text)) {
+          if (line && ctx.measureText(line + char).width > width) { lines.push(line); line = char; }
+          else line += char;
+        }
+        lines.push(line);
+        return lines;
+      }
+      function makePng(text, event) {
+        const c = document.createElement('canvas');
+        const ctx = c.getContext('2d');
+        if (!ctx) throw new Error('此瀏覽器不支援圖片產生');
+        const W = 1080, M = 90, lineW = W - M * 2;
+        const font = '"PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif';
+        const paragraphs = text.split('\n\n').map(p => p.split('\n'));
+        let bodyFont = 42, bodyLine = 69, groups, eventLines, required;
+        do {
+          ctx.font = `400 ${bodyFont}px ${font}`;
+          groups = paragraphs.map(group => group.flatMap(line => wrap(ctx, line, lineW)));
+          ctx.font = `600 30px ${font}`;
+          eventLines = wrap(ctx, `事件：${event}`, lineW);
+          required = 275 + eventLines.length * 48 + 45 + groups.reduce((h, lines) => h + lines.length * bodyLine + 30, 0) + 135;
+          if (required <= 1320 || bodyFont <= 33) break;
+          bodyFont -= 1;
+          bodyLine = Math.round(bodyFont * 1.65);
+        } while (true);
+        // Height follows the content: last text baseline plus a bottom margin matching the top one.
+        const lastBaseline = 240 + eventLines.length * 48 + 52 + groups.reduce((h, lines) => h + lines.length * bodyLine + 30, 0) - bodyLine - 30;
+        const H = Math.ceil((lastBaseline + 100) / 10) * 10;
+        c.width = W; c.height = H;
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#1e1e1d'; ctx.font = `700 58px ${font}`;
+        ctx.fillText('萬用回應SOP', M, 144);
+        ctx.fillStyle = '#262624'; ctx.font = `600 30px ${font}`;
+        let y = 240;
+        for (const line of eventLines) { ctx.fillText(line, M, y); y += 48; }
+        y += 52;
+        ctx.fillStyle = '#2c2c2a'; ctx.font = `400 ${bodyFont}px ${font}`;
+        for (const lines of groups) {
+          for (const line of lines) { ctx.fillText(line, M, y); y += bodyLine; }
+          y += 30;
+        }
+        return c.toDataURL('image/png');
+      }
+      // Fields filled by a sample button stay random on every generate; anything the user typed is kept.
+      const refillAuto = () => Object.keys(data).forEach(key => { if ($(key).dataset.auto) $(key).value = chosen[key]; });
+      const fillSample = text => {
+        $('event').value = text;
+        if (!$('team').value.trim()) $('team').value = '相關團隊';
+        pickAll();
+        Object.keys(data).forEach(key => { if (!$(key).value.trim() || $(key).dataset.auto) { $(key).value = chosen[key]; $(key).dataset.auto = '1'; } });
+        document.querySelector('details.options').open = true;
+        updateUnknownFields();
+        $('output').hidden = true; imageData = ''; generated = '';
+        $('event').focus();
+      };
+      function generate() {
+        if (!topic()) { $('event').focus(); return; }
+        pickAll();
+        refillAuto();
+        const text = makeText();
+        try {
+          const img = makePng(text, topic());
+          generated = text; imageData = img;
+          $('preview-image').src = img;
+          $('output').hidden = false;
+          notify('');
+          if (window.innerWidth < 1000) $('output').scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'});
+        } catch (err) { console.error(err); alert('圖片產生失敗，請換個瀏覽器試試。'); }
+      }
+      $('generator-form').addEventListener('submit', event => { event.preventDefault(); generate(); });
+      $('regenerate').addEventListener('click', generate);
+      document.querySelectorAll('[data-event]').forEach(button => button.addEventListener('click', () => fillSample(button.dataset.event)));
+      $('copy').addEventListener('click', async () => {
+        if (!generated) return;
+        const text = `【萬用回應SOP】\n事件：${topic()}\n\n${generated}`;
+        try {
+          if (!navigator.clipboard?.writeText) throw new Error('clipboard unavailable');
+          await navigator.clipboard.writeText(text); notify('已複製文字。');
+        } catch {
+          const input = document.createElement('textarea');
+          input.value = text; input.style.cssText = 'position:fixed;left:-10000px;top:0;';
+          document.body.appendChild(input); input.select();
+          const ok = document.execCommand('copy'); input.remove();
+          notify(ok ? '已複製文字。' : '無法自動複製，請改用其他瀏覽器。');
+        }
+      });
+      $('download').addEventListener('click', () => {
+        if (!imageData) return;
+        const link = document.createElement('a');
+        link.href = imageData; link.download = `universal-response-sop-${new Date().toLocaleDateString('sv-SE')}.png`;
+        document.body.appendChild(link); link.click(); link.remove();
+        notify('已送出圖片下載。若使用 iPhone，也可以長按圖片儲存。');
+      });
+      // When an input changes, avoid accidentally downloading an outdated preview.
+      document.querySelectorAll('#generator-form input').forEach(el => el.addEventListener('input', () => {
+        if (el.id === 'event') updateUnknownFields();
+        delete el.dataset.auto;
+        $('output').hidden = true; imageData = ''; generated = '';
+      }));
+    })();
+  </script>
+</body>
+</html>
